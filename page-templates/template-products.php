@@ -24,6 +24,12 @@ $category = get_field('category');
     );
 
     $category_posts = get_posts($args);
+    
+    // Redirect kohe esimese toote lehele
+    if($category_posts && count($category_posts) > 0) {
+        wp_redirect(get_the_permalink($category_posts[0]->ID));
+        exit;
+    }
     ?>
 
     <div class="products d-flex">
