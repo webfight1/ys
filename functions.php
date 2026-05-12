@@ -51,6 +51,7 @@ function create_post_type_products(){
 				'editor',
 				'thumbnail'
 			),
+			'rewrite' => false,
 			'taxonomies' => array( 'products_categories', 'post_tag' ),
             'can_export' => true,
             'menu_icon'   => 'dashicons-sticky',
@@ -73,6 +74,32 @@ function create_products_tax() {
             'show_admin_column' => true
 		)
 	);
+}
+
+// Custom rewrite rules for products to be root-level
+function custom_products_rewrite_rules() {
+    // Get all products slugs
+    $products = get_posts(array(
+        'post_type' => 'products',
+        'posts_per_page' => -1,
+        'fields' => 'ids'
+    ));
+    
+    foreach ($products as $product_id) {
+        $slug = get_post_field('post_name', $product_id);
+        if ($slug) {
+            add_rewrite_rule(
+                '^' . $slug . '/?$',
+                'index.php?products=' . $slug,
+                'top'
+            );
+            add_rewrite_rule(
+                '^' . $slug . '/page/?([0-9]{1,})/?$',
+                'index.php?products=' . $slug . '&paged=$matches[1]',
+                'top'
+            );
+        }
+    }
 }
 
 // navigation
@@ -412,6 +439,7 @@ add_action('wp_footer', 'add_file_upload_translation_script'); // File upload t√
 add_action('init', 'register_template_menu');
 add_action('init', 'create_post_type_products');
 add_action('init', 'create_products_tax');
+add_action('init', 'custom_products_rewrite_rules');
 add_action('get_header', 'enable_threaded_comments');
 // Remove Actions
 remove_action('wp_head', 'feed_links_extra', 3);
