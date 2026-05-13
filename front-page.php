@@ -96,7 +96,7 @@ $products = get_posts($args);
                     $title = $product_block['title'];
                     $content = $product_block['content'];
                     $image = $product_block['image'];
-                    $link = $product_block['link'];
+                    $link = $product_block['url'];
                     ?>
 
                     <div class="front_product d-flex flex-wrap">
