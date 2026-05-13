@@ -31,7 +31,11 @@ $products = get_posts($args);
                     ?>
 
                     <?php if($show_in_front_page): ?>
-                        <a class="product" href="<?php echo get_the_permalink($product->ID); ?>" style="background-image: url(<?php echo $background_image; ?>);">
+                        <?php
+                        $product_slug = get_post_field('post_name', $product->ID);
+                        $product_url = home_url('/' . $product_slug . '/');
+                        ?>
+                        <a class="product" href="<?php echo $product_url; ?>" style="background-image: url(<?php echo $background_image; ?>);">
                             <div class="image_containter d-flex justify-content-center align-items-center">
                                 <img src="<?php echo $icon; ?>" />
                             </div>
