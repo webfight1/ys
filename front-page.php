@@ -87,31 +87,32 @@ $products = get_posts($args);
 
         <div class="front_products">
             <?php
-            $pagesArray = array(29, 31);
+            $front_products = get_field('front_products');
             ?>
 
-            <?php foreach($pagesArray as $page): ?>
-                <?php
-                $pageID = icl_object_id($page);
-                $content_post = get_post($pageID);
-                $content = $content_post->post_content;
-                $content = apply_filters('the_content', $content);
-                $content = str_replace(']]>', ']]&gt;', $content);
-                ?>
+            <?php if($front_products): ?>
+                <?php foreach($front_products as $product_block): ?>
+                    <?php
+                    $title = $product_block['title'];
+                    $content = $product_block['content'];
+                    $image = $product_block['image'];
+                    $link = $product_block['link'];
+                    ?>
 
-                <div class="front_product d-flex flex-wrap">
-                    <div class="image col-md-6" style="background-image: url(<?php echo get_the_post_thumbnail_url($pageID); ?>);">
-                    </div>
-                    <div class="text_container col-md-6">
-                        <div class="text">    
-                            <h2><?php echo get_the_title($pageID); ?></h2>
-                            <?php echo $content; ?>
+                    <div class="front_product d-flex flex-wrap">
+                        <div class="image col-md-6" style="background-image: url(<?php echo $image; ?>);">
+                        </div>
+                        <div class="text_container col-md-6">
+                            <div class="text">    
+                                <h2><?php echo $title; ?></h2>
+                                <?php echo $content; ?>
 
-                            <a class="button" href="<?php echo get_the_permalink($pageID); ?>"><?php _e('See more', 'Ysse'); ?></a>
+                                <a class="button" href="<?php echo $link; ?>"><?php _e('See more', 'Ysse'); ?></a>
+                            </div>
                         </div>
                     </div>
-                </div>
-            <?php endforeach; ?>
+                <?php endforeach; ?>
+            <?php endif; ?>
         </div>
     </div>
 </div>
