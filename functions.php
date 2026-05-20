@@ -78,6 +78,9 @@ function create_products_tax() {
 
 // Root-level permalink for 'products' CPT (WPML-aware)
 function custom_products_permalink($post_link, $post) {
+    if (is_numeric($post)) {
+        $post = get_post($post);
+    }
     if (!is_object($post) || $post->post_type !== 'products' || $post->post_status !== 'publish') {
         return $post_link;
     }
@@ -89,6 +92,19 @@ function custom_products_permalink($post_link, $post) {
     return $url;
 }
 add_filter('post_type_link', 'custom_products_permalink', 20, 2);
+
+// Force Yoast canonical to root-level URL for products CPT
+function custom_products_yoast_canonical($canonical) {
+    if (is_singular('products')) {
+        global $post;
+        if ($post) {
+            return custom_products_permalink($canonical, $post);
+        }
+    }
+    return $canonical;
+}
+add_filter('wpseo_canonical', 'custom_products_yoast_canonical', 20);
+add_filter('wpseo_opengraph_url', 'custom_products_yoast_canonical', 20);
 
 // Custom rewrite rules for products to be root-level
 function custom_products_rewrite_rules() {
