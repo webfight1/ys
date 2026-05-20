@@ -76,12 +76,17 @@ function create_products_tax() {
 	);
 }
 
-// Strip /products/ from CPT permalink — keeps WPML language prefix intact
+// Root-level permalink for 'products' CPT (WPML-aware)
 function custom_products_permalink($post_link, $post) {
-    if (is_object($post) && $post->post_type === 'products' && $post->post_status === 'publish') {
-        $post_link = preg_replace('#/products/#', '/', $post_link, 1);
+    if (!is_object($post) || $post->post_type !== 'products' || $post->post_status !== 'publish') {
+        return $post_link;
     }
-    return $post_link;
+    $url = home_url('/' . $post->post_name . '/');
+    $lang = apply_filters('wpml_post_language_details', null, $post->ID);
+    if (!empty($lang['language_code'])) {
+        $url = apply_filters('wpml_permalink', $url, $lang['language_code']);
+    }
+    return $url;
 }
 add_filter('post_type_link', 'custom_products_permalink', 20, 2);
 
