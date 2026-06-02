@@ -1,7 +1,10 @@
+		</main>
+
 		<footer>
 			<?php
 			$cookies_allowed = $_COOKIE['ysse_cookie'];
 			$logo = get_field('logo', 'option');
+			$logo_dims = $logo ? ysse_url_image_dimensions($logo, 'full', 120, 40) : null;
 			$footer_text = get_field('footer_text', 'option');
 			$footer_social = get_field('footer_social', 'option');
 			$cookies_text = get_field('cookies_text', 'option');
@@ -15,7 +18,7 @@
 						<?php if($logo) : ?>
 							<div id="footer_logo">
 								<a href="<?php echo home_url(); ?>">
-									<img class="svg" src="<?php echo $logo; ?>" alt="Ysse logo" class="logo-img">
+									<img class="svg logo-img" src="<?php echo $logo; ?>" alt="Ysse logo" width="<?php echo esc_attr($logo_dims['width']); ?>" height="<?php echo esc_attr($logo_dims['height']); ?>">
 								</a>
 							</div>
 							<p>© <?php echo date("Y"); ?> Ysse OÜ</p>
@@ -32,8 +35,9 @@
 						<div class="footer_social d-flex flex-wrap">
 							<?php foreach($footer_social as $social): ?>
 								<?php if($social['icon'] && $social['url']): ?>
-									<a href="<?php echo $social['url']; ?>">
-										<img src="<?php echo $social['icon']; ?>" />
+									<a href="<?php echo esc_url($social['url']); ?>">
+										<?php $social_dims = ysse_url_image_dimensions($social['icon'], 'full', 32, 32); ?>
+										<img src="<?php echo esc_url($social['icon']); ?>" alt="<?php echo esc_attr(ysse_get_social_icon_alt($social['url'], $social['icon'])); ?>" width="<?php echo esc_attr($social_dims['width']); ?>" height="<?php echo esc_attr($social_dims['height']); ?>" />
 									</a>
 								<?php endif; ?>
 							<?php endforeach; ?>

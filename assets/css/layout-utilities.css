@@ -1,0 +1,41 @@
+.d-flex {
+	display: flex !important;
+}
+
+.flex-wrap {
+	flex-wrap: wrap !important;
+}
+
+.flex-column {
+	flex-direction: column !important;
+}
+
+.justify-content-between {
+	justify-content: space-between !important;
+}
+
+.justify-content-center {
+	justify-content: center !important;
+}
+
+.align-items-center {
+	align-items: center !important;
+}
+
+.align-items-start {
+	align-items: flex-start !important;
+}
+
+@media (min-width: 768px) {
+	.col-md-6 {
+		flex: 0 0 50%;
+		max-width: 50%;
+	}
+}
+
+@media (min-width: 992px) {
+	.col-lg-6 {
+		flex: 0 0 50%;
+		max-width: 50%;
+	}
+}

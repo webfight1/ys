@@ -15,17 +15,9 @@
 		<meta name="google-site-verification" content="4kCibqTcwZXUxoWLQyW5e9j7ulrh-09rBfUrj1Fdlrs" />
 	</head>
 	<body <?php body_class(); ?>>
-		<!-- Google tag (gtag.js) -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=AW-944505518"></script>
-<script>
-	window.dataLayer = window.dataLayer || [];
-	function gtag(){dataLayer.push(arguments);}
-	gtag('js', new Date());
-
-	gtag('config', 'AW-944505518');
-</script>
 		<?php
 		$logo = get_field('logo', 'option');
+		$logo_dims = $logo ? ysse_url_image_dimensions($logo, 'full', 120, 40) : null;
 		?>
 
 		<header>
@@ -33,12 +25,12 @@
 				<?php if($logo) : ?>
 					<div id="logo">
 						<a href="<?php echo home_url(); ?>">
-							<img class="svg" src="<?php echo $logo; ?>" alt="Ysse logo" class="logo-img">
+							<img class="svg logo-img" src="<?php echo $logo; ?>" alt="Ysse logo" width="<?php echo esc_attr($logo_dims['width']); ?>" height="<?php echo esc_attr($logo_dims['height']); ?>">
 						</a>
 					</div>
 				<?php endif; ?>
 
-				<button type="button" class="mobile-menu-btn">
+				<button type="button" class="mobile-menu-btn" aria-label="<?php esc_attr_e('Ava menüü', 'Ysse'); ?>" aria-expanded="false">
 					<span></span>
 					<span></span>
 					<span></span>
@@ -55,3 +47,5 @@
 				</div>
 			</div>
 		</header>
+
+		<main id="main-content">

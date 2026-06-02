@@ -93,12 +93,15 @@ function custom_products_permalink($post_link, $post) {
 }
 add_filter('post_type_link', 'custom_products_permalink', 20, 2);
 
-// Strip /products/ from Yoast canonical and OG URL
-function custom_products_yoast_canonical($url) {
-    if (is_string($url) && strpos($url, '/products/') !== false) {
-        return preg_replace('#/products/#', '/', $url, 1);
+// Force Yoast canonical to root-level URL for products CPT
+function custom_products_yoast_canonical($canonical) {
+    if (is_singular('products')) {
+        global $post;
+        if ($post) {
+            return custom_products_permalink($canonical, $post);
+        }
     }
-    return $url;
+    return $canonical;
 }
 add_filter('wpseo_canonical', 'custom_products_yoast_canonical', 20);
 add_filter('wpseo_opengraph_url', 'custom_products_yoast_canonical', 20);
@@ -126,27 +129,6 @@ function ysse_enqueue_customizer_css() {
 }
 
 add_action('wp_enqueue_scripts', 'ysse_enqueue_customizer_css', 20);
-
-// 301 redirect old /products/{slug}/ URLs to root-level /{slug}/
-function custom_products_old_url_redirect() {
-    if (is_admin() || defined('DOING_AJAX') || defined('DOING_CRON')) {
-        return;
-    }
-    $request_uri = isset($_SERVER['REQUEST_URI']) ? $_SERVER['REQUEST_URI'] : '';
-    if (strpos($request_uri, '/products/') === false) {
-        return;
-    }
-    // Match /products/{slug}/ optionally prefixed with language code (e.g. /en/products/foo/)
-    if (preg_match('#^(/[a-z]{2})?/products/([^/?]+)/?(\?.*)?$#i', $request_uri, $m)) {
-        $lang_prefix = $m[1];
-        $slug = $m[2];
-        $query = isset($m[3]) ? $m[3] : '';
-        $new_url = home_url($lang_prefix . '/' . $slug . '/' . $query);
-        wp_redirect($new_url, 301);
-        exit;
-    }
-}
-add_action('template_redirect', 'custom_products_old_url_redirect');
 
 // Custom rewrite rules for products to be root-level
 function custom_products_rewrite_rules() {

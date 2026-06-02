@@ -1,14 +1,14 @@
 <?php get_header(); ?>
 
 <?php
-$header_image = get_field('header_image');
+$header_image = ysse_get_page_header_image_url('large');
 $header_subtitle = get_field('header_subtitle');
 $show_block = get_field('show_ask_windows_and_doors_offer_block');
 $show_block_wide = get_field('show_ask_windows_and_doors_offer_block_wide');
 ?>
 
 <div id="content" class="default-post">
-    <div class="content_header d-flex align-items-center" style="background-image: url(<?php if($header_image) echo $header_image; ?>);">
+    <div class="content_header d-flex align-items-center"<?php echo ysse_style_background_image($header_image); ?>>
         <div class="content_header_container">
             <h1><?php the_title(); ?></h1>
             
