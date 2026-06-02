@@ -1589,4 +1589,10 @@ function detailed_wpcf7_debug() {
 }
 add_action('init', 'detailed_wpcf7_debug');
 
+/**
+ * SEO meta overrides — Yoast title/desc/og/schema filtrid kõrge-prioriteetsete
+ * sihtlehtede jaoks. Vt inc/seo-overrides.php täpsema dokumentatsiooni jaoks.
+ */
+require_once get_template_directory() . '/inc/seo-overrides.php';
+
 ?>
