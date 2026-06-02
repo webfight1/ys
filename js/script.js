@@ -209,7 +209,10 @@
 			function ysseFixProductGallery($gallery) {
 				var $slider = $gallery.find('.ysse-product-slider');
 
-				if (!$slider.hasClass('slick-initialized')) {
+				// Slick peab olema initsialiseeritud JA data-objekt olemas.
+				// Kui slick init ebaõnnestus vaikselt (nt 0 slide-i), siis class
+				// võib olla lisatud, aga `.slick(...)` käsu kutsumine viskab TypeError.
+				if (!$slider.length || !$slider.hasClass('slick-initialized') || !$slider.data('slick')) {
 					return;
 				}
 
@@ -256,7 +259,12 @@
 					visibility: 'visible',
 					zIndex: 2
 				});
-				$slider.slick('setPosition');
+				try {
+					$slider.slick('setPosition');
+				} catch (e) {
+					// Slick instance broken — ignore. Galerii visuaalsuse jaoks
+					// pole setPosition kriitiline (CSS height-id on juba kohaldatud).
+				}
 			}
 
 			function ysseInitProductGallery($gallery) {
