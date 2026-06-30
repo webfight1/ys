@@ -351,8 +351,42 @@
 			}
 
 			if ($.fn.slick && $('.ysse-product-slider').length) {
-				$('.product-gallery').each(function () {
-					ysseInitProductGallery($(this));
+				// Init ühe väikese delay-iga — annab brauserile aega layout välja
+				// arvutada (eriti mobiilil, kus flexbox + col-lg-6 + padding kombo
+				// võib alguses anda containerile 0-laiuse, mistõttu slick arvutab
+				// vale slide-laiuse ja muudab pildid nähtamatuks).
+				window.setTimeout(function () {
+					$('.product-gallery').each(function () {
+						ysseInitProductGallery($(this));
+					});
+				}, 0);
+
+				// Pärast kõigi piltide laadimist sunnime slick-i uuesti dimensiooni
+				// arvutama — vajalik kui slick init toimus enne kui pildid said laetud.
+				$(window).on('load.ysseGallery', function () {
+					$('.ysse-product-slider.slick-initialized').each(function () {
+						var $slider = $(this);
+						if ($slider.data('slick')) {
+							try {
+								$slider.slick('refresh');
+								$slider.slick('setPosition');
+							} catch (e) { /* slick katki — ignoreeri */ }
+						}
+					});
+					$('.product-gallery').each(function () {
+						ysseFixProductGallery($(this));
+					});
+				});
+
+				// Mobiil: orientatsiooni muutus sunnib täielikult uue init-i
+				// (mitte ainult setPosition), kuna asNavFor seos muutub
+				// (mobiilil null, desktop'il $pager).
+				$(window).on('orientationchange.ysseGallery', function () {
+					window.setTimeout(function () {
+						$('.product-gallery').each(function () {
+							ysseInitProductGallery($(this));
+						});
+					}, 100);
 				});
 
 				var ysseGalleryResizeTimer;
