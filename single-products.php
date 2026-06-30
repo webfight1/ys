@@ -48,6 +48,63 @@ $deklar_icon_dims = $deklar_icon ? ysse_url_image_dimensions($deklar_icon, 'full
         <?php $ysse_lcp_gallery_done = false; ?>
         <div class="blocks">
             <?php foreach($blocks as $block): ?>
+                <?php
+                $block_type = isset($block['image_or_gallery']) ? $block['image_or_gallery'] : '';
+
+                // === Tehtud tööd plokk — täis-laius 6-veerg grid, kasutab block_gallery field'i ===
+                if ($block_type === 'completed_works' && !empty($block['block_gallery'])):
+                    $cw_images  = $block['block_gallery'];
+                    $cw_total   = count($cw_images);
+                    $cw_batch   = 6;
+                    $cw_heading = !empty($block['lower_title']) ? $block['lower_title'] : __('Tehtud tööd', 'Ysse');
+                ?>
+                    <section class="completed-works" data-cw-batch="<?php echo esc_attr($cw_batch); ?>" data-cw-total="<?php echo esc_attr($cw_total); ?>">
+                        <div class="completed-works__inner">
+                            <h2 class="completed-works__title"><?php echo esc_html($cw_heading); ?></h2>
+                            <ul class="completed-works__grid">
+                                <?php foreach ($cw_images as $index => $img):
+                                    $img_url  = !empty($img['sizes']['medium_large']) ? $img['sizes']['medium_large'] : (!empty($img['sizes']['large']) ? $img['sizes']['large'] : (!empty($img['url']) ? $img['url'] : ''));
+                                    $img_full = !empty($img['url']) ? $img['url'] : $img_url;
+                                    $img_w    = !empty($img['sizes']['medium_large-width']) ? (int) $img['sizes']['medium_large-width'] : (!empty($img['width']) ? (int) $img['width'] : 600);
+                                    $img_h    = !empty($img['sizes']['medium_large-height']) ? (int) $img['sizes']['medium_large-height'] : (!empty($img['height']) ? (int) $img['height'] : 400);
+                                    // Pealkiri pildi all: eelistab Title-d, fallback Caption
+                                    $img_cap  = !empty($img['title']) ? $img['title'] : (!empty($img['caption']) ? $img['caption'] : '');
+                                    $img_alt  = !empty($img['alt']) ? $img['alt'] : ($img_cap ?: sprintf(__('Tehtud töö %d', 'Ysse'), $index + 1));
+                                    $is_hidden = $index >= $cw_batch ? ' is-hidden' : '';
+                                ?>
+                                    <li class="completed-works__item<?php echo $is_hidden; ?>">
+                                        <button type="button" class="completed-works__btn"
+                                                data-full="<?php echo esc_url($img_full); ?>"
+                                                data-caption="<?php echo esc_attr($img_cap); ?>"
+                                                aria-label="<?php echo esc_attr(sprintf(__('Ava pilt: %s', 'Ysse'), $img_alt)); ?>">
+                                            <div class="completed-works__img-wrap">
+                                                <img class="completed-works__img"
+                                                     src="<?php echo esc_url($img_url); ?>"
+                                                     width="<?php echo esc_attr($img_w); ?>"
+                                                     height="<?php echo esc_attr($img_h); ?>"
+                                                     alt="<?php echo esc_attr($img_alt); ?>"
+                                                     loading="lazy"
+                                                     decoding="async" />
+                                            </div>
+                                        </button>
+                                        <?php if ($img_cap): ?>
+                                            <p class="completed-works__caption"><?php echo esc_html($img_cap); ?></p>
+                                        <?php endif; ?>
+                                    </li>
+                                <?php endforeach; ?>
+                            </ul>
+
+                            <?php if ($cw_total > $cw_batch): ?>
+                                <div class="completed-works__more-wrap">
+                                    <button type="button" class="completed-works__more">
+                                        <?php _e('Vaata rohkem', 'Ysse'); ?>
+                                    </button>
+                                </div>
+                            <?php endif; ?>
+                        </div>
+                    </section>
+                <?php continue; endif; ?>
+
                 <div class="block d-flex flex-wrap">
                     <div class="block_left col-lg-6">
                         <div class="text">

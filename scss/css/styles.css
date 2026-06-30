@@ -1925,3 +1925,44 @@ body.ysse-scroll-reveal-enabled .ysse-scroll-reveal.is-visible {
     transition: none;
   }
 }
+
+/* === Tehtud tööd (single-products lehe alaplokk) === */
+.completed-works { width: 100%; margin-top: 0; padding: 48px 0 64px; background: #EAFAFC; }
+.completed-works__inner { width: 100%; margin: 0 auto; padding: 0 16px; }
+.completed-works__title { margin: 0 0 32px; color: #0094AA; text-align: center; font-size: 28px; letter-spacing: 0.5px; }
+.completed-works__grid { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(6, 1fr); gap: 16px; }
+.completed-works__item { margin: 0; padding: 0; }
+.completed-works__item.is-hidden { display: none; }
+.completed-works__img-wrap { position: relative; width: 100%; aspect-ratio: 3 / 4; overflow: hidden; background: #eee; }
+.completed-works__img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform 0.3s ease; }
+.completed-works__item:hover .completed-works__img { transform: scale(1.04); }
+.completed-works__caption { margin: 10px 0 0; font-size: 14px; line-height: 1.4; color: #0094AA; font-weight: 700; text-align: center; }
+.completed-works__more-wrap { margin-top: 36px; text-align: center; }
+.completed-works__more { display: inline-block; padding: 12px 32px; background: #0094AA; color: #FFFFFF; border: 0; font-size: 15px; letter-spacing: 0.5px; cursor: pointer; transition: background 0.2s; }
+.completed-works__more:hover { background: #41B3C4; }
+.completed-works__more.is-done { display: none; }
+@media (max-width: 1200px) { .completed-works__grid { grid-template-columns: repeat(4, 1fr); } }
+@media (max-width: 768px) { .completed-works__grid { grid-template-columns: repeat(3, 1fr); gap: 12px; } .completed-works__title { font-size: 22px; } }
+@media (max-width: 480px) { .completed-works__grid { grid-template-columns: repeat(2, 1fr); gap: 8px; } }
+
+/* === Tehtud tööd: pildiplokk on klõpsatav nupp === */
+.completed-works__btn { display: block; width: 100%; padding: 0; margin: 0; background: transparent; border: 0; cursor: zoom-in; appearance: none; }
+.completed-works__btn:focus { outline: 2px solid #0094AA; outline-offset: 2px; }
+
+/* === Lightbox === */
+body.ysse-lightbox-open { overflow: hidden; }
+.ysse-lightbox { position: fixed; inset: 0; z-index: 99999; display: none; background: rgba(0,0,0,0.92); align-items: center; justify-content: center; }
+.ysse-lightbox.is-open { display: flex; }
+.ysse-lightbox__stage { max-width: 95vw; max-height: 95vh; text-align: center; position: relative; }
+.ysse-lightbox__img { max-width: 95vw; max-height: 85vh; height: auto; width: auto; display: block; margin: 0 auto; box-shadow: 0 8px 40px rgba(0,0,0,0.5); }
+.ysse-lightbox__caption { margin: 12px 0 0; color: #fff; font-size: 15px; line-height: 1.4; text-align: center; }
+.ysse-lightbox__close, .ysse-lightbox__prev, .ysse-lightbox__next { position: absolute; background: rgba(0,0,0,0.5); border: 0; color: #fff; cursor: pointer; font-size: 32px; line-height: 1; width: 48px; height: 48px; border-radius: 50%; display: flex; align-items: center; justify-content: center; transition: background 0.2s; }
+.ysse-lightbox__close:hover, .ysse-lightbox__prev:hover, .ysse-lightbox__next:hover { background: rgba(0,0,0,0.8); }
+.ysse-lightbox__close { top: 20px; right: 20px; font-size: 28px; }
+.ysse-lightbox__prev { left: 24px; top: 50%; transform: translateY(-50%); font-size: 36px; }
+.ysse-lightbox__next { right: 24px; top: 50%; transform: translateY(-50%); font-size: 36px; }
+@media (max-width: 600px) {
+    .ysse-lightbox__prev { left: 8px; width: 40px; height: 40px; font-size: 30px; }
+    .ysse-lightbox__next { right: 8px; width: 40px; height: 40px; font-size: 30px; }
+    .ysse-lightbox__close { top: 8px; right: 8px; width: 40px; height: 40px; }
+}

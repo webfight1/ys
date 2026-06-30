@@ -488,7 +488,7 @@
 				ysseReplaceSvgImages($('header'));
 			}
 
-			ysseScheduleIdle(ysseReplaceSvgImages);
+			ysseScheduleIdle(function () { ysseReplaceSvgImages(); });
 		});
 
 		$(window).on('load', function() {
@@ -529,5 +529,88 @@
 				}
 			});
 		}
+
+		// === Tehtud tööd: "Vaata rohkem" laeb 6 pilti kaupa ===
+		$('.completed-works').each(function () {
+			var $section = $(this);
+			var batch = parseInt($section.data('cw-batch'), 10) || 6;
+			var $btn = $section.find('.completed-works__more');
+			$btn.on('click', function () {
+				var $hidden = $section.find('.completed-works__item.is-hidden');
+				$hidden.slice(0, batch).removeClass('is-hidden');
+				if ($section.find('.completed-works__item.is-hidden').length === 0) {
+					$btn.addClass('is-done');
+				}
+			});
+		});
+
+		// === Tehtud tööd: lightbox ===
+		(function () {
+			var $box = null;
+			var images = [];
+			var idx = 0;
+
+			function build() {
+				if ($box) { return; }
+				$box = $('<div class="ysse-lightbox" role="dialog" aria-modal="true" aria-label="Pildigalerii">' +
+					'<button type="button" class="ysse-lightbox__close" aria-label="Sulge">&times;</button>' +
+					'<button type="button" class="ysse-lightbox__prev" aria-label="Eelmine pilt">&lsaquo;</button>' +
+					'<button type="button" class="ysse-lightbox__next" aria-label="Järgmine pilt">&rsaquo;</button>' +
+					'<div class="ysse-lightbox__stage">' +
+					'<img class="ysse-lightbox__img" alt="" />' +
+					'<p class="ysse-lightbox__caption"></p>' +
+					'</div>' +
+					'</div>').appendTo('body');
+
+				$box.find('.ysse-lightbox__close').on('click', close);
+				$box.find('.ysse-lightbox__prev').on('click', prev);
+				$box.find('.ysse-lightbox__next').on('click', next);
+				$box.on('click', function (e) { if (e.target === this) { close(); } });
+			}
+
+			function show() {
+				var img = images[idx];
+				$box.find('.ysse-lightbox__img').attr('src', img.src).attr('alt', img.caption || '');
+				$box.find('.ysse-lightbox__caption').text(img.caption || '').toggle(!!img.caption);
+				var multi = images.length > 1;
+				$box.find('.ysse-lightbox__prev, .ysse-lightbox__next').toggle(multi);
+			}
+
+			function open(items, startIdx) {
+				build();
+				images = items;
+				idx = startIdx || 0;
+				show();
+				$box.addClass('is-open');
+				$('body').addClass('ysse-lightbox-open');
+				$(document).on('keydown.ysselb', onKey);
+			}
+
+			function close() {
+				if (!$box) { return; }
+				$box.removeClass('is-open');
+				$('body').removeClass('ysse-lightbox-open');
+				$(document).off('keydown.ysselb');
+			}
+
+			function prev() { idx = (idx - 1 + images.length) % images.length; show(); }
+			function next() { idx = (idx + 1) % images.length; show(); }
+
+			function onKey(e) {
+				if (e.key === 'Escape') { close(); }
+				else if (e.key === 'ArrowLeft') { prev(); }
+				else if (e.key === 'ArrowRight') { next(); }
+			}
+
+			$('.completed-works').on('click', '.completed-works__btn', function () {
+				var $btn = $(this);
+				var $section = $btn.closest('.completed-works');
+				var $btns = $section.find('.completed-works__btn');
+				var items = $btns.map(function () {
+					return { src: $(this).data('full'), caption: $(this).data('caption') };
+				}).get();
+				open(items, $btns.index($btn));
+			});
+		})();
 	});
 })(jQuery, this);
