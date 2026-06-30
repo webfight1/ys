@@ -287,6 +287,7 @@
   }
   #content.single-product .blocks .block .product-gallery {
     padding: 32px 15px;
+    width: 100vw;
   }
   #content.single-product .blocks .block .product-gallery #bx-pager.product-custom-pager {
     position: relative;
