@@ -249,7 +249,7 @@ function template_styles() {
     wp_register_style('styles', get_template_directory_uri() . '/scss/css/styles.css', array(), '1.0.46', 'all');
     wp_enqueue_style('styles');
 
-    wp_register_style('styles_mobile', get_template_directory_uri() . '/scss/css/styles_mobile.css', array(), '1.0.21', 'all');
+    wp_register_style('styles_mobile', get_template_directory_uri() . '/scss/css/styles_mobile.css', array(), '1.0.22', 'all');
     wp_enqueue_style('styles_mobile');
 }
 
