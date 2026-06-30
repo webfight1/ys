@@ -148,30 +148,62 @@ function custom_products_old_url_redirect() {
 }
 add_action('template_redirect', 'custom_products_old_url_redirect');
 
-// Custom rewrite rules for products to be root-level
+// Custom rewrite rules for products to be root-level (WPML-aware: registers
+// rules for every active language with its URL prefix, using each language's
+// translated slug).
 function custom_products_rewrite_rules() {
-    // Get all products slugs
-    $products = get_posts(array(
-        'post_type' => 'products',
-        'posts_per_page' => -1,
-        'fields' => 'ids'
-    ));
-    
-    foreach ($products as $product_id) {
-        $slug = get_post_field('post_name', $product_id);
-        if ($slug) {
-            add_rewrite_rule(
-                '^' . $slug . '/?$',
-                'index.php?products=' . $slug,
-                'top'
-            );
-            add_rewrite_rule(
-                '^' . $slug . '/page/?([0-9]{1,})/?$',
-                'index.php?products=' . $slug . '&paged=$matches[1]',
-                'top'
-            );
+    // Skip admin/AJAX/REST requests — rewrite rules pole neis kontekstides vaja,
+    // ja `wpml_switch_language` kutsumine admin'is segab WPML keele konteksti
+    // (nt admin "Edit" link võib peale seda valele lehele suunata).
+    // NB: WP-CLI EI ole välistatud, sest `wp rewrite flush` peab need reeglid
+    // aktiivseks lugema.
+    if ( ! ( defined( 'WP_CLI' ) && WP_CLI ) ) {
+        if ( is_admin()
+            || ( defined( 'DOING_AJAX' ) && DOING_AJAX )
+            || ( defined( 'REST_REQUEST' ) && REST_REQUEST ) ) {
+            return;
         }
     }
+
+    $languages = apply_filters( 'wpml_active_languages', null, array( 'skip_missing' => 0 ) );
+    if ( empty( $languages ) ) {
+        $languages = array( 'et' => array( 'language_code' => 'et' ) );
+    }
+
+    $default_lang = apply_filters( 'wpml_default_language', 'et' );
+
+    foreach ( $languages as $lang_code => $lang_info ) {
+        do_action( 'wpml_switch_language', $lang_code );
+
+        $products = get_posts( array(
+            'post_type'        => 'products',
+            'posts_per_page'   => -1,
+            'fields'           => 'ids',
+            'suppress_filters' => false,
+        ) );
+
+        // NB: WPML eemaldab keele prefiksi (/en/, /fi/) URL-ist enne WP rewrite
+        // matchimist, seega kõik reeglid registreeritakse root-leveli — keele
+        // info edastatakse `&lang=` query var-i kaudu, et WPML laadiks õige
+        // tõlke ja `?products=` query var match'iks õige slug-i.
+        foreach ( $products as $product_id ) {
+            $slug = get_post_field( 'post_name', $product_id );
+            if ( $slug ) {
+                add_rewrite_rule(
+                    '^' . $slug . '/?$',
+                    'index.php?products=' . $slug . '&lang=' . $lang_code,
+                    'top'
+                );
+                add_rewrite_rule(
+                    '^' . $slug . '/page/?([0-9]{1,})/?$',
+                    'index.php?products=' . $slug . '&paged=$matches[1]&lang=' . $lang_code,
+                    'top'
+                );
+            }
+        }
+    }
+
+    do_action( 'wpml_switch_language', $default_lang );
 }
 
 // navigation
@@ -214,7 +246,7 @@ function template_styles() {
     wp_register_style('fonts', get_template_directory_uri() . '/fonts/fonts.css', array(), '1.0', 'all');
     wp_enqueue_style('fonts');
 
-    wp_register_style('styles', get_template_directory_uri() . '/scss/css/styles.css', array(), '1.0.41', 'all');
+    wp_register_style('styles', get_template_directory_uri() . '/scss/css/styles.css', array(), '1.0.46', 'all');
     wp_enqueue_style('styles');
 
     wp_register_style('styles_mobile', get_template_directory_uri() . '/scss/css/styles_mobile.css', array(), '1.0.20', 'all');
@@ -915,6 +947,25 @@ function ysse_optimize_content_html($content) {
 }
 
 function ysse_add_content_image_dimensions($content) {
+    // Skip WP/Backbone/Underscore template markup ja admin context — selle <img>
+    // parser kahjustaks {{ data.X }}, <%= %>, <# #> placeholder'eid (lõhub
+    // näiteks WP Media Library tmpl-attachment Underscore template'i).
+    if ( ! is_string( $content ) || $content === '' ) {
+        return $content;
+    }
+    if ( is_admin()
+        || ( defined( 'REST_REQUEST' ) && REST_REQUEST )
+        || ( defined( 'DOING_AJAX' ) && DOING_AJAX )
+        || ( defined( 'XMLRPC_REQUEST' ) && XMLRPC_REQUEST )
+        || ( defined( 'WP_CLI' ) && WP_CLI ) ) {
+        return $content;
+    }
+    if ( strpos( $content, '{{' ) !== false
+        || strpos( $content, '<#' ) !== false
+        || strpos( $content, '<%' ) !== false ) {
+        return $content;
+    }
+
     return preg_replace_callback(
         '/<img\b([^>]*?)>/i',
         function ($matches) {
@@ -1143,7 +1194,7 @@ function template_scripts() {
         return;
     }
 
-    wp_enqueue_script('script', get_template_directory_uri() . '/js/script.js', array('jquery'), '1.0.21', true);
+    wp_enqueue_script('script', get_template_directory_uri() . '/js/script.js', array('jquery'), '1.0.24', true);
     wp_enqueue_script('cookie', get_template_directory_uri() . '/js/lib/jquery.cookie.js', array('jquery'), '1.0.0', true);
 
     if (ysse_page_needs_slider()) {
@@ -1466,7 +1517,15 @@ add_action('wp_enqueue_scripts', 'template_scripts');
 add_action('wp_head', 'ysse_print_lcp_preloads', 1);
 add_action('wp_head', 'ysse_print_critical_css', 2);
 add_action('template_redirect', function () {
-    if (is_admin() || wp_doing_ajax()) {
+    // Skip admin, AJAX, REST API, XML-RPC, cron, CLI — output filter on
+    // ainult front-end HTML jaoks. REST API on eriti oluline: Gutenberg
+    // postitab läbi REST-i ja kui me muudame JSON vastust, salvestamine murdub.
+    if ( is_admin()
+        || wp_doing_ajax()
+        || ( defined( 'REST_REQUEST' ) && REST_REQUEST )
+        || ( defined( 'XMLRPC_REQUEST' ) && XMLRPC_REQUEST )
+        || ( defined( 'DOING_CRON' ) && DOING_CRON )
+        || ( defined( 'WP_CLI' ) && WP_CLI ) ) {
         return;
     }
 
@@ -1594,5 +1653,10 @@ add_action('init', 'detailed_wpcf7_debug');
  * sihtlehtede jaoks. Vt inc/seo-overrides.php täpsema dokumentatsiooni jaoks.
  */
 require_once get_template_directory() . '/inc/seo-overrides.php';
+
+/**
+ * ACF field group "Tehtud tööd" — AJUTISELT VÄLJAS (media library debug)
+ */
+// require_once get_template_directory() . '/inc/acf-completed-works.php';
 
 ?>
